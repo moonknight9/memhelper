@@ -6,44 +6,64 @@ import com.vaadin.flow.component.icon.VaadinIcon
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout
 import com.vaadin.flow.component.orderedlayout.VerticalLayout
 import com.vaadin.flow.component.textfield.TextField
+import com.vaadin.flow.data.value.ValueChangeMode
 import de.eschwank.backend.entities.Note
 import java.time.LocalDateTime
 
 
 class MemoryDialog(private var note: Note) : Dialog() {
 
+    private val title = TextField("Title:", "Title...")
+    private val content = TextField("Note:", "Type your note here!")
+
+    private val saveButton = Button(VaadinIcon.CLOUD_UPLOAD_O.create()) {
+        saveNote(title, content)
+        fireEvent(DialogCloseActionEvent(this, true))
+    }
+
     init {
         isCloseOnEsc = false
 
         setComponents()
+
+        checkValidation()
     }
 
     private fun setComponents() {
         val layout = VerticalLayout()
 
-        val title = TextField("Title:", note.title, "Title...")
-        title.isRequired = true
+        setRequired(title)
+        setRequired(content)
 
-        val content = TextField("Note:", note.content, "Type your note here!")
-        content.isRequired = true
+        if (note.isPersistet()) {
+            title.value = note.title
+            content.value = note.content
+        }
 
         layout.add(title, content)
 
-        val btnLayout = getButtonLayout(title, content)
+        val btnLayout = getButtonLayout()
         add(layout, btnLayout)
     }
 
-    private fun getButtonLayout(title: TextField, content: TextField): HorizontalLayout {
+    private fun setRequired(field: TextField) {
+        field.isRequired = true
+        field.addValueChangeListener { checkValidation() }
+        field.valueChangeMode = ValueChangeMode.EAGER
+    }
+
+    private fun checkValidation() {
+        saveButton.isEnabled = !(title.isInvalid || title.value == "" || content.isInvalid || content.value == "")
+    }
+
+    private fun getButtonLayout(): HorizontalLayout {
         val btnLayout = HorizontalLayout()
-        val confirmButton = Button(VaadinIcon.CLOUD_UPLOAD_O.create()) {
-            saveNote(title, content)
-            fireEvent(DialogCloseActionEvent(this, true))
-        }
+
         val cancelButton = Button(VaadinIcon.EXIT_O.create()) {
             fireEvent(DialogCloseActionEvent(this, true))
         }
 
-        btnLayout.add(confirmButton, cancelButton)
+        btnLayout.add(saveButton, cancelButton)
         if (note.isPersistet()) {
             val deleteButton = Button(VaadinIcon.BAN.create()) {
                 note.delete()
