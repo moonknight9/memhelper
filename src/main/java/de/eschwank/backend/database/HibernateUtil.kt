@@ -22,7 +22,7 @@ object HibernateUtil {
         }
     }
 
-    public fun exec(f: (Session) -> Any) : Any? {
+    private fun exec(f: (Session) -> Any): Any? {
         val session = sessionFactory.openSession()
         var ret: Any? = null
         try {
@@ -39,19 +39,24 @@ object HibernateUtil {
         return ret
     }
 
-    public fun save(obj : Any) {
+    fun save(obj: Any) {
         exec { session -> session.saveOrUpdate(obj) }
     }
 
-    public fun query(query : String): List<Any?>? {
-       return exec { session -> session.createQuery(query).list() } as List<Any?>?
+    fun <T> query(query: String, clazz: Class<T>, offset: Int = -1, limit: Int = -1): List<*>? {
+        return exec { session ->
+            val q = session.createQuery(query, clazz)
+            if (offset >= 0) {
+                q.firstResult = offset
+            }
+            if (limit >= 0) {
+                q.maxResults = limit
+            }
+            q.list()
+        } as List<*>?
     }
 
-    public fun <T> query(query : String, clazz : Class<T>): List<*>? {
-        return exec { session -> session.createQuery(query, clazz).list() } as List<*>?
-    }
-
-    public fun delete(obj : Any) {
-       exec { session -> session.delete(obj) }
+    fun delete(obj: Any) {
+        exec { session -> session.delete(obj) }
     }
 }

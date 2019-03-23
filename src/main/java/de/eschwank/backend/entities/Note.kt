@@ -11,9 +11,8 @@ class Note() : AbstractEntity() {
     var title: String = ""
     var content: String = ""
 
-    var isArchived = false
-
     var creationTimeStamp: LocalDateTime = LocalDateTime.now()
+    var lastUpdate: LocalDateTime = creationTimeStamp
 
     @ElementCollection(fetch = FetchType.EAGER)
     var tags: List<String> = ArrayList()
@@ -24,9 +23,9 @@ class Note() : AbstractEntity() {
     }
 
     companion object {
-        fun all() : List<Note>? {
+        fun all(offset:Int = -1, limit:Int = -1) : List<Note>? {
             // TODO: find a better solution here
-            return HibernateUtil.query("FROM Note", Note::class.java) as List<Note>
+            return HibernateUtil.query("FROM Note", Note::class.java, offset, limit) as List<Note>
         }
     }
 }

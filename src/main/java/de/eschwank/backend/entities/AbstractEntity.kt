@@ -11,7 +11,11 @@ import javax.persistence.MappedSuperclass
 abstract class AbstractEntity : Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Long = 0
+    var id: Long = 0L
+
+    fun isPersistet(): Boolean {
+        return id != 0L
+    }
 
     fun save() {
         HibernateUtil.save(this)
@@ -22,11 +26,11 @@ abstract class AbstractEntity : Serializable {
     }
 
     companion object {
-        fun <T: Any?> query(query: String) : List<AbstractEntity>? {
+        fun <T : Any?> query(query: String): List<AbstractEntity>? {
             return HibernateUtil.query(query, AbstractEntity::class.java) as List<AbstractEntity>
         }
 
-        fun <T: Any?> all() : List<AbstractEntity>? {
+        fun <T : Any?> all(): List<AbstractEntity>? {
             return HibernateUtil.query("SELECT * FROM ${AbstractEntity::class.java};", AbstractEntity::class.java) as List<AbstractEntity>
         }
     }
