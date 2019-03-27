@@ -15,7 +15,7 @@ class Note() : AbstractEntity() {
     var lastUpdate: LocalDateTime = creationTimeStamp
 
     @ElementCollection(fetch = FetchType.EAGER)
-    var tags: List<String> = ArrayList()
+    var tags: Set<String> = HashSet()
 
     constructor(title: String, content:String) : this() {
         this.title = title
